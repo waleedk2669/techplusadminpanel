@@ -1,0 +1,29 @@
+{
+    "authFooter": {
+        "subtitle": "Tech plus React Dashboard Template By",
+        "privacyPolicy": "Privacy Policy",
+        "support": "Support",
+        "templates": "MUI Templates",
+        "themes": "CodedThemes"
+    },
+    "authLogin": {
+        "login": "login",
+        "forgotPassword": "Forgot Password?",
+        "keepMeSignIn": "Keep me sign in",
+        "password": "Password",
+        "emailAddress": "Email Address"
+    },
+    "authRegister": {
+        "register": "Register",
+        "firstName": "First Name*",
+        "lastName": "Last Name*",
+        "company": "Company",
+        "emailAddress": "Email Address*",
+        "password": "Password",
+        "agreementText": "By Signing up, you agree to our",
+        "createAccount": "Create Account",
+        "privacyPolicy": "Privacy Policy",
+        "termsOfService": "Terms of Service",
+        "and": "and"
+    }
+}
