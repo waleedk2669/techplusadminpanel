@@ -75,14 +75,16 @@ import React, { useState, useEffect } from 'react';
 import { Typography } from '@mui/material';
 import CreateForm from '../../components/dataTables/CreateForm.js';
 import { useSelector, useDispatch } from 'react-redux';
-import { setComfortKits, setFilteredRows } from '../../store/reducers/comfortKits';
+import { createComfortKitRequest, setComfortKits, setFilteredRows, setLoading, viewComfortKitRequest } from '../../store/reducers/comfortKits';
 import { useNavigate } from 'react-router-dom';
 import { fetchMedicinesRequest } from '../../store/reducers/medicines';
 import { useSnackbar } from '../../components/Snackbar/SnackbarProvider';
+
 const CreateComfortKit = () => {
   const medicines = useSelector((state) => state.medicines.medicines);
   const [selectedMedicine, setSelectedMedicine] = useState(null);
   const [selectedMedicines, setSelectedMedicines] = useState([]);
+  const [selectedMedicinesIds, setSelectedMedicinesIds] = useState([]);
   const {addSnackbar} = useSnackbar();
   const handleMedicineChange = (event, newValue) => {
     setSelectedMedicine(newValue);
@@ -90,44 +92,84 @@ const CreateComfortKit = () => {
 
   const handleAddMedicine = () => {
     if (selectedMedicine) {
-      setSelectedMedicines((prev) => [...prev, selectedMedicine]);
-      setSelectedMedicine(null);
+      if(selectedMedicines.includes(selectedMedicine)){
+        console.log("want to remove selectedMedicine")
+        handleRemoveMedicine(selectedMedicine.id);
+      }
+      else{
+        setSelectedMedicines((prev) => [...prev, selectedMedicine]);
+        setSelectedMedicinesIds((prev) => [...prev, selectedMedicine.id]);
+        setSelectedMedicine(null);
+      }
     }
   };
 
   const handleRemoveMedicine = (medicineId) => {
     const newSelectedMedicines = selectedMedicines.filter((medicine) => medicine.id !== medicineId);
+    const newSelectedMedicinesIds = selectedMedicinesIds.filter((medicine) => medicine !== medicineId);
     setSelectedMedicines(newSelectedMedicines);
+    setSelectedMedicinesIds(newSelectedMedicinesIds);
   };
 
-  const formFields = ['id', 'medicines', 'price'];
-  const defaultData = {
+  const formFields = [
+    {
+    name: 'name',
+    label: 'name',
+    type: 'string',
+    enabled: true,
+  },
+  {
+    name: 'medicines',
+    label: 'medicines',
+    enabled: true,
+  },
+  {
+    name: 'price',
+    label: 'price',
+    type: 'number',
+    enabled: true,
+  },
+  {
+    name: 'is_enabled',
+    label: 'enabled',
+    type: 'switch',
+    enabled: true
+  }
+];
+const defaultData = {
     id: '',
     medicines: [],
     price: '',
   };
-  const formName = 'Comfort Kit';
+  const formName = 'Create Comfort Kit';
 
-  const comfortKits = useSelector((state) => state.comfortKits.comfortKits);
-  const filteredRows = useSelector((state) => state.comfortKits.filteredRows);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
+  const loading = useSelector((state) => state.comfortKits.loading)
   const handleCancelCreate = () => {
     navigate(-1);
   };
-
+  let submitted = false;
   const handleCreate = (newOrder) => {
-    dispatch(setComfortKits([...comfortKits, newOrder]));
-    dispatch(setFilteredRows([...filteredRows, newOrder]));
+    dispatch(setLoading(true));
+    submitted = true;
+    dispatch(createComfortKitRequest({...newOrder.data, medicines: selectedMedicinesIds}));
     addSnackbar('Comfort Kit created successfully!', 'success');
-    navigate('/dashboard/comfortKits');
+      navigate('/dashboard/comfortKits');
   };
 
   useEffect(() => {
-    dispatch(fetchMedicinesRequest());
+    dispatch(fetchMedicinesRequest({rowsPerPage: 20}));
   }, []);
-
+  useEffect(()=>{
+    if(!loading && submitted) {
+      console.log('here is submitted')
+      
+    }
+  },[submitted, loading]);
+  if(loading){
+    return (<div>loading...</div>)
+  }
   return (
     <div>
       <Typography variant="h3" component="h2" margin="10px">

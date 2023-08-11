@@ -57,10 +57,25 @@ function* fetchMedicinesSaga(action) {
 }
 
 function* createMedicineSaga(action){
-  const {name, discription, price, enabled} = action.payload.data;
+  const {id, name, discription, mode, price, is_enabled} = action.payload.data;
   let {authToken} = action.payload;
   if(!authToken){
     authToken = localStorage.getItem('authToken');
+  }
+  let params = {
+    'name': name,
+    'description': discription,
+    'price': price,
+    'is_enabled': is_enabled=='on'? 1 : 0,
+  };
+  if(id){
+    params = {
+      id: id,
+      'name': name,
+      'description': discription,
+      'price': price,
+      'is_enabled': is_enabled=='on'? 1 : 0,
+    }
   }
   console.log(authToken)
   const apiCall = ()=>{
@@ -68,12 +83,7 @@ function* createMedicineSaga(action){
       'https://project.devxtop.com/api/medicines/set',
       '',
       {
-        params: {
-          'name': name,
-          'description': discription,
-          'price': price,
-          'is_enabled': enabled=='on'? 1 : 0,
-        },
+        params: params,
         headers: {
           'accept': '*/*',
           'Authorization': authToken,
@@ -93,7 +103,7 @@ function* createMedicineSaga(action){
 }
 
 function* deleteMedicineSaga(action){
-  let {id, authToken, rowsPerPage} = action.payload;
+  let {id, authToken} = action.payload;
   if(!authToken){
     authToken = localStorage.getItem('authToken');
   }
@@ -116,31 +126,10 @@ function* deleteMedicineSaga(action){
 
     );
   }
-  const apiCall2 = () => {
-    return (
-      axios.post(MEDICINES_API_URL + `/api/medicines/list?records=${rowsPerPage}`,
-      '',
-      {
-        // params: {
-        //   'name': name,
-        //   'description': discription,
-        //   'price': price,
-        //   'is_enabled': enabled=='on'? 1 : 0,
-        // },
-        headers: {
-          'accept': '*/*',
-          'Authorization': authToken,
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      })
-    );
-  }
   try {
     const response = yield call(apiCall);
     console.log(response.data);
-      const response2 = yield call(apiCall2);
       yield put(deleteMedicineSuccess(response.data));
-      yield put(createMedicineSuccess(response.data));
   } catch (error) {
     yield put(deleteMedicineFailure(error.message));
   }
@@ -188,6 +177,22 @@ function* searchMedicinesSaga(action) {
     }
     
     const apiCall = () => {
+      if(searchText == ''){
+        return axios.post(MEDICINES_API_URL + `/api/medicines/list?records=${rowsPerPage}`,
+      '',
+      {
+        // params: {
+        //   'name': name,
+        //   'description': discription,
+        //   'price': price,
+        //   'is_enabled': enabled=='on'? 1 : 0,
+        // },
+        headers: {
+          'accept': '*/*',
+          'Authorization': authToken,
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      })}
       return (
         axios.post(MEDICINES_API_URL + `/api/medicines/search?search=${searchText}&records=${rowsPerPage}`,
         '',

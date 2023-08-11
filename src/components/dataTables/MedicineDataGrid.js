@@ -54,15 +54,22 @@ const MedicineDataGrid = () => {
     // ...same as before...
     {
       field: 'id',
-      headerName: 'ID',
+      headerName: 'Id',
       width: 100,
       headerClassName: 'dataGridHeader', // Custom class for header with icon
     },
     {
-      field: 'name', headerName: 'NAME',headerAlign:'center', width: 400,
+      field: 'name', headerName: 'Name',headerAlign:'left', width: 200,
     },
     {
-      field: 'price', headerName: 'PRICE',headerAlign:'left', width: 150,
+      field: 'description', headerName: 'Description',headerAlign:'left', width: 200,
+    },
+    {
+      field: 'is_enabled', headerName: 'Enabled',headerAlign:'left', width: 200,
+    },
+    
+    {
+      field: 'price', headerName: 'Price',headerAlign:'left', width: 150,
       renderCell: (params) => (
         <Typography>
           ${params.row.price}
@@ -121,10 +128,8 @@ const MedicineDataGrid = () => {
         {
           authToken: authToken,
           id: selectedMedicine.id,
-          rowsPerPage: rowsPerPage,
         }
         ));
-        window.location.reload();
     }
     setSelectedMedicine(null);
     setShowDeleteConfirmation(false);

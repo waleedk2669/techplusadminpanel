@@ -40,7 +40,7 @@ const EditMedicine = () => {
     enabled: true
   }
 ];
-    const formName = 'Update Medicine';
+  const formName = 'Update Medicine';
   const selectedMedicine = useSelector((state)=> state.medicines.selectedMedicine)
   console.log(selectedMedicine)
   const medicines = useSelector((state)=> state.medicines.medicines);

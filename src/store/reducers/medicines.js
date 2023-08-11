@@ -63,9 +63,12 @@ const medicineSlice = createSlice({
     },
     deleteMedicineRequest: (state,action) => {
       state.loading = true;
+      state.medicines = state.medicines.filter((medicine) => medicine.id !== action.payload.id);
+
     },
     deleteMedicineSuccess: (state, action) => {
       state.loading = false;
+      console.log(action.payload)
     },
     deleteMedicineFailure: (state, action) => {
       state.loading = false;

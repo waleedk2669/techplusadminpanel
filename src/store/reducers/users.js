@@ -7,6 +7,8 @@ const initialState = {
   isEditFormOpen: false,
   loading: false,
   error: null,
+  viewUser: null,
+  roles: null,
   filteredRows: [], // New state property to manage the filtered rows
 };
 
@@ -51,13 +53,56 @@ const userSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
+    viewUsersRequest: (state,action) => {
+      state.loading = true;
+    },
+    viewUsersSuccess: (state, action) => {
+      state.loading = false;
+      state.viewUser = action.payload.data;
+       // Initialize filteredUsers with all Users
+    },
+    viewUsersFailure: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
+    changeStatusRequest: (state,action) => {
+      state.loading = true;
+    },
+    changeStatusSuccess: (state, action) => {
+      state.loading = false;
+       // Initialize filteredUsers with all Users
+    },
+    changeStatusFailure: (state, action) => {
+      state.loading = false;
+    },
+    roleIdRequest: (state,action) => {
+      state.loading = true;
+    },
+    roleIdSuccess: (state, action) => {
+      state.loading = false;
+      state.roles = action.payload
+       // Initialize filteredUsers with all Users
+    },
+    roleIdFailure: (state, action) => {
+      state.loading = false;
+    },
+    createUserRequest: (state,action) => {
+      state.loading = true;
+    },
+    createUserSuccess: (state, action) => {
+      state.loading = false;
+       // Initialize filteredUsers with all Users
+    },
+    createUserFailure: (state, action) => {
+      state.loading = false;
+    },
     searchUsersRequest: (state) => {
       state.loading = true;
     },
     searchUsersSuccess: (state, action) => {
       state.loading = false;
-      state.users = action.payload;
-      state.filteredRows = action.payload; // Update filteredUsers with search results
+      state.users = action.payload.data.data;
+      state.filteredRows = action.payload.data.data; // Update filteredUsers with search results
     },
     searchUsersFailure: (state, action) => {
       state.loading = false;
@@ -94,7 +139,19 @@ export const {
   searchUsersFailure,
   newPageRequest,
   newPageSuccess,
-  newPageFailure
+  newPageFailure,
+  viewUsersRequest,
+  viewUsersSuccess,
+  viewUsersFailure,
+  changeStatusRequest,
+  changeStatusSuccess,
+  changeStatusFailure,
+  roleIdFailure,
+  roleIdSuccess,
+  roleIdRequest,
+  createUserRequest,
+  createUserSuccess,
+  createUserFailure,
 } = userSlice.actions;
 
 export default userSlice.reducer;

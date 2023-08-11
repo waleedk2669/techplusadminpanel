@@ -7,7 +7,7 @@ import { useSnackbar } from '../../components/Snackbar/SnackbarProvider';
 import { viewMedicineRequest } from '../../store/reducers/medicines';
 
 const ViewMedicine = () => {
-  const formFields = ['id', 'name', 'price',];
+  const formFields = ['name','description', 'price','is_enabled'];
   const formName = 'Medicine'
   const selectedMedicine = useSelector((state)=> state.medicines.selectedMedicine)
   const navigate = useNavigate();

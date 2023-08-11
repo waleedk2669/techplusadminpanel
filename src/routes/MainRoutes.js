@@ -22,13 +22,15 @@ const EditComfortKit = Loadable(lazy(() => import('../pages/comfortKits/EditComf
 const ViewComfortKit = Loadable(lazy(() => import('../pages/comfortKits/ViewComfortKit.js')));
 
 const Users = Loadable(lazy(() => import('../pages/users/index.js')));
-const AuthRegister = Loadable(lazy(() => import('../pages/authentication/authForms/AuthRegister')));
+const PrivateRoute = Loadable(lazy(() => import('../components/PrivateRoute')));
+const CreateUser = Loadable(lazy(() => import('../pages/users/CreateUser.js')));
+const ViewUser = Loadable(lazy(() => import('../pages/users/ViewUser.js')));
 
 // ==============================|| MAIN ROUTING ||============================== //
 
 const MainRoutes = {
   path: '/dashboard',
-  element: <MainLayout />,
+  element: <PrivateRoute component={<MainLayout />}/>,
   children: [
     {
       index: true,
@@ -88,7 +90,11 @@ const MainRoutes = {
     },
     {
       path: 'users/create',
-      element: <AuthRegister />
+      element: <CreateUser />
+    },
+    {
+      path: 'users/view',
+      element: <ViewUser />
     },
     
   ]

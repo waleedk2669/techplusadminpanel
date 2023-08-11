@@ -6,7 +6,6 @@ import { Box, Grid } from '@mui/material';
 // project import
 import AuthCard from './AuthCard';
 import Logo from '../../components/logo';
-import AuthFooter from '../../components/cards/AuthFooter';
 
 // assets
 import AuthBackground from '../../assets/images/auth/authBackground';
@@ -21,7 +20,6 @@ const AuthWrapper = ({ children }) => (
       direction="column"
       justifyContent="flex-end"
       sx={{
-        minHeight: '100vh'
       }}
     >
       <Grid item xs={12} sx={{ ml: 3, mt: 3 }}>
@@ -40,9 +38,6 @@ const AuthWrapper = ({ children }) => (
             <AuthCard>{children}</AuthCard>
           </Grid>
         </Grid>
-      </Grid>
-      <Grid item xs={12} sx={{ m: 3, mt: 1 }}>
-        <AuthFooter />
       </Grid>
     </Grid>
   </Box>

@@ -7,6 +7,7 @@ const initialState = {
   isEditFormOpen: false,
   loading: false,
   error: null,
+  viewComfortKit: null,
   filteredRows: [], // New state property to manage the filtered rows
 };
 
@@ -14,6 +15,9 @@ const comfortKitSlice = createSlice({
   name: 'comfortKits',
   initialState,
   reducers: {
+    setLoading: (state, action)=>{
+      state.loading = action.payload;
+    },
     setComfortKits: (state, action) => {
       state.comfortKits = action.payload;
     },
@@ -38,25 +42,58 @@ const comfortKitSlice = createSlice({
     setFilteredRows: (state, action) => {
       state.filteredRows = action.payload;
     },
-    fetchComfortKitsRequest: (state) => {
+    fetchComfortKitsRequest: (state, action) => {
       state.loading = true;
     },
     fetchComfortKitsSuccess: (state, action) => {
       state.loading = false;
-      state.comfortKits = action.payload;
-      state.filteredRows = action.payload; // Initialize filteredComfortKits with all ComfortKits
+      state.comfortKits = action.payload.data.data;
     },
     fetchComfortKitsFailure: (state, action) => {
       state.loading = false;
       state.error = action.payload;
     },
-    searchComfortKitsRequest: (state) => {
+    viewComfortKitRequest: (state, action) => {
+      state.loading = true
+      console.log("entered")
+    },
+    viewComfortKitSuccess: (state, action) => {
+      state.loading = false;
+      state.viewComfortKit = action.payload.data;
+      console.log(state.viewComfortKit);
+    },
+    viewComfortKitFailure: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+      console.log(state.error);
+    },
+    deleteComfortKitRequest: (state, action) => {
       state.loading = true;
+      state.comfortKits = state.comfortKits.filter((comfortKit) => comfortKit.id !== action.payload.id);
+    },
+    deleteComfortKitSuccess: (state, action) => {
+      console.log('deleteComfortKit');
+      state.loading = false;
+    },
+    deleteComfortKitFailure: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
+    createComfortKitRequest: (state, action) => {
+      state.loading = true
+    },
+    createComfortKitSuccess: (state, action) => {
+      state.loading = false;
+    },
+    createComfortKitFailure: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
+    searchComfortKitsRequest: (state,action) => {
     },
     searchComfortKitsSuccess: (state, action) => {
       state.loading = false;
-      state.comfortKits = action.payload;
-      state.filteredRows = action.payload; // Update filteredComfortKits with search results
+      state.comfortKits = action.payload.data.data;
     },
     searchComfortKitsFailure: (state, action) => {
       state.loading = false;
@@ -78,6 +115,7 @@ const comfortKitSlice = createSlice({
 });
 
 export const {
+  setLoading,
   setComfortKits,
   addComfortKit,
   editComfortKit,
@@ -88,6 +126,15 @@ export const {
   fetchComfortKitsRequest,
   fetchComfortKitsSuccess,
   fetchComfortKitsFailure,
+  deleteComfortKitRequest,
+  deleteComfortKitSuccess,
+  deleteComfortKitFailure,
+  viewComfortKitRequest,
+  viewComfortKitSuccess,
+  viewComfortKitFailure,
+  createComfortKitRequest,
+  createComfortKitSuccess,
+  createComfortKitFailure,
   searchComfortKitsRequest,
   searchComfortKitsSuccess,
   searchComfortKitsFailure,

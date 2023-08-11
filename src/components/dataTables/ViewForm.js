@@ -9,6 +9,21 @@ const ViewForm = ({ row, onCancel, formName, formFields }) => {
         <Box>
             {
                 formFields.map((field) => {
+                    if(field=='medicines'){
+                        return (
+                            <FormGroup key={field}>
+                            <Typography style={{ flex: 1 / 3 }}>
+                                {field}
+                            </Typography>
+                            <SquareDataField style={{ display:'flex',alignItems:'center' }} margin="normal">
+
+                                {row.medicines.map((med)=>{
+                                    return <div style={{padding:'5px 10px', margin: '3px 10px', border:'1px solid grey', borderRadius:'5px'}}>{med.name}</div>
+                                })}
+                            </SquareDataField>
+                        </FormGroup>
+                        ); 
+                    }
                     return (
                         <FormGroup key={field}>
                             <Typography style={{ flex: 1 / 3 }}>

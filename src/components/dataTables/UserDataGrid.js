@@ -1,16 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import { IconButton, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button, Typography } from '@mui/material';
+import { IconButton, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button, Switch, Typography } from '@mui/material';
 import { Edit, Delete, Visibility, Add } from '@mui/icons-material';
 import SearchBar from './SearchBar'; // Assuming the SearchBar component is in a separate file
 import { useDispatch, useSelector } from 'react-redux';
-import { setFilteredRows, setUsers, setSelectedUser, newPageRequest } from '../../store/reducers/users';
+import { setFilteredRows, setUsers, setSelectedUser, newPageRequest, changeStatusRequest } from '../../store/reducers/users';
 import { useNavigate } from 'react-router';
 import FlexContainer from './FlexContainer';
 import CustomPagination from './CustomPagination';
-import { searchUsersRequest, fetchUsersRequest } from '../../store/reducers/users';
+import { searchUsersRequest, fetchUsersRequest, viewUsersRequest } from '../../store/reducers/users';
 import RowPerPageMenu from './RowsPerPageMenu';
 
+
+const RenderSwitch = ({isEnabled, handleChange})=>{
+  const [toggle, setToggle] = useState(isEnabled==1)
+  return (
+    <Switch  
+    checked={toggle}
+    onClick={()=> setToggle((prev)=> !prev)}
+    onChange={handleChange}
+    styles={{ flex: '1', width: '100%' }} 
+    margin="normal" />
+
+  )
+}
 const UserDataGrid = () => {
 
   const navigate = useNavigate();
@@ -35,7 +48,7 @@ const UserDataGrid = () => {
 
   useEffect(() => {
     // Update the filteredRows whenever the Users change
-    dispatch(fetchUsersRequest(rowsPerPage));
+    dispatch(fetchUsersRequest({rowsPerPage: rowsPerPage}));
   }, [dispatch]);
 
     useEffect(() => {
@@ -56,14 +69,43 @@ const UserDataGrid = () => {
       headerClassName: 'dataGridHeader', // Custom class for header with icon
     },
     {
-      field: 'title', headerName: 'TITLE',headerAlign:'center', width: 400,
+      field: 'first_name',
+      headerName: 'First name',
+      width: 150,
+      headerClassName: 'dataGridHeader', // Custom class for header with icon
     },
     {
-      field: 'price', headerName: 'PRICE',headerAlign:'left', width: 150,
+      field: 'last_name',
+      headerName: 'Last name',
+      width: 150,
+      headerClassName: 'dataGridHeader', // Custom class for header with icon
+    },
+    {
+      field: 'dob',
+      headerName: 'DOB',
+      width: 100,
+      headerClassName: 'dataGridHeader', // Custom class for header with icon
+    },
+    {
+      field: 'email',
+      headerName: 'Email',
+      width: 150,
+      headerClassName: 'dataGridHeader', // Custom class for header with icon
+    },
+    {
+      field: 'is_enabled',
+      headerName: 'status',
+      width: 100,
+      headerClassName: 'dataGridHeader', // Custom class for header with icon
       renderCell: (params) => (
-        <Typography>
-          ${params.row.price}
-        </Typography>)
+        <>
+          <RenderSwitch isEnabled={params.row.is_enabled} 
+          handleChange={(e)=> {
+            handleChangeStatus(params.row,e)
+          }}
+          />
+        </>
+      ),
     },
     {
       field: 'actions',
@@ -78,24 +120,30 @@ const UserDataGrid = () => {
           <IconButton onClick={() => handleView(params.row)}>
             <Visibility />
           </IconButton>
-          <IconButton onClick={() => handleEdit(params.row)}>
-            <Edit />
-          </IconButton>
-          <IconButton onClick={() => handleDeleteConfirmation(params.row)}>
-            <Delete />
-          </IconButton>
         </>
       ),
     },
   ];
 
-
+  const handleChangeStatus=(row, e) =>{
+    dispatch(changeStatusRequest({id: row.id, status: row.is_enabled}))
+    dispatch(setUsers(users.map(user => {
+      if(user.id==row.id){
+        console.log('i am here');
+        return {
+          ...user,
+          is_enabled: user.is_enabled==1?0:1
+        }
+      }
+      return user;
+    })))
+  }
   const handleRowsPerPageChange = (event) => {
     setRowsPerPage(event.target.value);
     setCurrentPage(1); // Reset to the first page when changing rows per page
   };
   const handleView = (row) => {
-    dispatch(setSelectedUser(row));
+    dispatch(viewUsersRequest({id: row.id}));
     sessionStorage.setItem('selectedUser', row);
     navigate('view');
 
@@ -107,28 +155,10 @@ const UserDataGrid = () => {
     navigate('edit');
   };
 
-  const handleDeleteConfirmation = (row) => {
-    dispatch(setSelectedUser(row));
-    setShowDeleteConfirmation(true);
-  };
-
-  const handleDelete = () => {
-    if (selectedUser) {
-      dispatch(setUsers(users.filter((row) => row.id !== selectedUser.id)));
-      dispatch(setFilteredRows(filteredRows.filter((item) => item.id !== selectedUser.id))); // Update the filteredRows state as well
-    }
-    setSelectedUser(null);
-    setShowDeleteConfirmation(false);
-  };
-
-
-  const handleCloseModal = () => {
-    setSelectedUser(null);
-    setShowDeleteConfirmation(false);
-  };
-
+  
+  
   const handleSearch = (searchText) => {
-      dispatch(searchUsersRequest(searchText));
+      dispatch(searchUsersRequest({searchText: searchText, rowsPerPage: rowsPerPage}));
     setCurrentPage(1);
   };
   const handleCreateUser = () => {
@@ -166,7 +196,7 @@ const UserDataGrid = () => {
 
 
       </FlexContainer>
-      {/* <RowPerPageMenu rowsPerPage={rowsPerPage} handleChange={handleRowsPerPageChange} />
+      <RowPerPageMenu rowsPerPage={rowsPerPage} handleChange={handleRowsPerPageChange} />
       <DataGrid
         rows={filteredRows.slice(startIndex, endIndex)}
         columns={columns}
@@ -185,26 +215,10 @@ const UserDataGrid = () => {
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={handlePageChange}
-        /> */}
+        />
 
         {/* Render the CustomPagination component */}
 
-      {/* <Dialog open={showDeleteConfirmation} onClose={handleCloseModal}>
-        <DialogTitle>Delete Row</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Are you sure you want to delete this row?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseModal} color="secondary">
-            Cancel
-          </Button>
-          <Button onClick={handleDelete} variant="contained" color="error">
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog> */}
     </div>
   );
 };

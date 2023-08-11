@@ -4,7 +4,7 @@ import { IconButton, Dialog, DialogTitle, DialogContent, DialogContentText, Dial
 import { Edit, Delete, Visibility, Add } from '@mui/icons-material';
 import SearchBar from './SearchBar'; // Assuming the SearchBar component is in a separate file
 import { useDispatch, useSelector } from 'react-redux';
-import { setFilteredRows, setComfortKits, setSelectedComfortKit, newPageRequest } from '../../store/reducers/comfortKits';
+import { setComfortKits, setSelectedComfortKit, newPageRequest, setLoading, deleteComfortKitRequest } from '../../store/reducers/comfortKits';
 import { useNavigate } from 'react-router';
 import FlexContainer from './FlexContainer';
 import CustomPagination from './CustomPagination';
@@ -15,27 +15,23 @@ const ComfortKitDataGrid = () => {
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const filteredRows = useSelector((state) => state.comfortKits.filteredRows)
   const comfortKits = useSelector((state) => state.comfortKits.comfortKits)
   const selectedComfortKit = useSelector((state) => state.comfortKits.selectedComfortKit)
 
   const [rowsPerPage, setRowsPerPage] = useState(5); // Initialize with default value
-
-  
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+  const totalPages = Math.ceil(comfortKits.length / rowsPerPage);
   
   const startIndex = (currentPage - 1) * rowsPerPage;
-  const endIndex = Math.min(startIndex + rowsPerPage, filteredRows.length);
-
-  const [loading, setLoading] = useState(true); // Add a loading state
+  const endIndex = Math.min(startIndex + rowsPerPage, comfortKits.length);
+  const loading = useSelector(state => state.comfortKits.loading);
 
   console.log('DataGridWithCRUD render');
 
   useEffect(() => {
-    // Update the filteredRows whenever the ComfortKits change
-    dispatch(fetchComfortKitsRequest());
+    // Update the comfortKits whenever the ComfortKits change
+    dispatch(fetchComfortKitsRequest({rowsPerPage: rowsPerPage}));
   }, [dispatch]);
 
     useEffect(() => {
@@ -49,21 +45,24 @@ const ComfortKitDataGrid = () => {
         }
         setLoading(false)
       }
-    }, [comfortKits]);
+    }, [comfortKits, rowsPerPage]);
   const columns = [
     // ...same as before...
     {
       field: 'id',
-      headerName: 'ID',
+      headerName: 'Id',
       width: 100,
       headerClassName: 'dataGridHeader', // Custom class for header with icon
 
     },
     {
-      field: 'title', headerName: 'TITLE',headerAlign:'center', width: 400,
+      field: 'name', headerName: 'Name',headerAlign:'left', width: 200,
     },
     {
-      field: 'price', headerName: 'PRICE',headerAlign:'left', width: 150,
+      field: 'is_enabled', headerName: 'Enabled',headerAlign:'left', width: 200,
+    },
+    {
+      field: 'price', headerName: 'Price',headerAlign:'left', width: 150,
       renderCell: (params) => (
         <Typography>
           ${params.row.price}
@@ -100,12 +99,14 @@ const ComfortKitDataGrid = () => {
   };
   const handleView = (row) => {
     dispatch(setSelectedComfortKit(row));
+    dispatch(setLoading(true));
     sessionStorage.setItem('selectedComfortKit', row);
     navigate('view');
 
   };
 
   const handleEdit = (row) => {
+    dispatch(setLoading(true));
     dispatch(setSelectedComfortKit(row));
     sessionStorage.setItem('selectedComfortKit', row);
     navigate('edit');
@@ -118,8 +119,7 @@ const ComfortKitDataGrid = () => {
 
   const handleDelete = () => {
     if (selectedComfortKit) {
-      dispatch(setComfortKits(comfortKits.filter((row) => row.id !== selectedComfortKit.id)));
-      dispatch(setFilteredRows(filteredRows.filter((item) => item.id !== selectedComfortKit.id))); // Update the filteredRows state as well
+      dispatch(deleteComfortKitRequest({id: selectedComfortKit.id}));
     }
     setSelectedComfortKit(null);
     setShowDeleteConfirmation(false);
@@ -132,7 +132,7 @@ const ComfortKitDataGrid = () => {
   };
 
   const handleSearch = (searchText) => {
-      dispatch(searchComfortKitsRequest(searchText));
+      dispatch(searchComfortKitsRequest({searchText: searchText, rowsPerPage: rowsPerPage}));
     setCurrentPage(1);
   };
   const handleCreateComfortKit = () => {
@@ -172,7 +172,7 @@ const ComfortKitDataGrid = () => {
       </FlexContainer>
       <RowPerPageMenu rowsPerPage={rowsPerPage} handleChange={handleRowsPerPageChange} />
       <DataGrid
-        rows={filteredRows.slice(startIndex, endIndex)}
+        rows={comfortKits.slice(startIndex, endIndex)}
         columns={columns}
         pageSize={rowsPerPage} // Set pageSize to show rows per page in DataGrid
         rowsPerPageOptions={[]} // Disable rows per page options
