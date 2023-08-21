@@ -3,12 +3,11 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
   medicines: [],
-  selectedMedicine: null,
-  isEditFormOpen: false,
   loading: false,
   error: null,
   viewMedicine: null,
-  filteredRows: [], // New state property to manage the filtered rows
+  pageCount: null,
+  currentPage: null,
 };
 
 const medicineSlice = createSlice({
@@ -39,7 +38,7 @@ const medicineSlice = createSlice({
     setFilteredRows: (state, action) => {
       state.filteredRows = action.payload;
     },
-    createMedicineRequest: (state,action) => {
+    createMedicineRequest: (state, action) => {
       state.loading = true;
     },
     createMedicineSuccess: (state, action) => {
@@ -49,19 +48,20 @@ const medicineSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
-    viewMedicineRequest: (state,action) => {
+    viewMedicineRequest: (state, action) => {
       state.loading = true;
+      state.viewMedicine = null;
     },
     viewMedicineSuccess: (state, action) => {
       state.loading = false;
-      const response = action.payload;
+      const response = action.payload.data;
       state.viewMedicine = response
     },
     viewMedicineFailure: (state, action) => {
       state.loading = false;
       state.error = action.payload;
     },
-    deleteMedicineRequest: (state,action) => {
+    deleteMedicineRequest: (state, action) => {
       state.loading = true;
       state.medicines = state.medicines.filter((medicine) => medicine.id !== action.payload.id);
 
@@ -74,14 +74,16 @@ const medicineSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
-    fetchMedicinesRequest: (state,action) => {
+    fetchMedicinesRequest: (state, action) => {
       state.loading = true;
+      state.medicines = null;
     },
     fetchMedicinesSuccess: (state, action) => {
       state.loading = false;
       state.medicines = action.payload.data.data;
+      state.pageCount = action.payload.data.last_page;
+      state.currentPage = action.payload.data.current_page;
       console.log(action.payload.data.data);
-      state.filteredRows = action.payload.data.data; // Initialize filteredMedicines with all Medicines
     },
     fetchMedicinesFailure: (state, action) => {
       state.loading = false;
@@ -93,7 +95,6 @@ const medicineSlice = createSlice({
     searchMedicinesSuccess: (state, action) => {
       state.loading = false;
       state.medicines = action.payload.data.data;
-      state.filteredRows = action.payload.data.data; // Update filteredMedicines with search results
     },
     searchMedicinesFailure: (state, action) => {
       state.loading = false;
@@ -105,7 +106,6 @@ const medicineSlice = createSlice({
     newPageSuccess: (state, action) => {
       state.loading = false;
       state.medicines = action.payload;
-      state.filteredRows = action.payload; // Update filteredMedicines with search results
     },
     newPageFailure: (state, action) => {
       state.loading = false;

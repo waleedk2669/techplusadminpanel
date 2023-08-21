@@ -1,49 +1,122 @@
-import React from 'react'
-import { Typography } from '@mui/material';
-import EditForm from '../../components/dataTables/EditForm';
+import React, { useEffect } from 'react'
+import { SetForm } from '../../components/SetForm';
 import { useSelector, useDispatch } from 'react-redux';
-import { setProducts, setFilteredRows, setSelectedProduct} from '../../store/reducers/products';
-import { useNavigate } from 'react-router';
+import { createNewOrderRequest, hospiceRequest, pharmacyRequest, nurseRequest, patientRequest, viewNewOrderRequest } from '../../store/reducers/newOrders';
+import { useNavigate, useParams } from 'react-router';
 import { useSnackbar } from '../../components/Snackbar/SnackbarProvider';
 
 const EditOrder = () => {
-  const formFields = ["id", 'status'];
-  const formName = 'Order';
-  const selectedProduct = useSelector((state)=> state.products.selectedProduct)
-  console.log(selectedProduct)
-  const products = useSelector((state)=> state.products.products);
-  const filteredRows = useSelector((state)=> state.products.filteredRows);
+  const params = useParams();
+  const formName = 'Create New Order';
+  const loading = useSelector((state) => state.newOrders.loading)
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const hospice = useSelector((state) => state.newOrders.hospice)
+  const pharmacy = useSelector((state) => state.newOrders.pharmacy)
+  const nurse = useSelector((state) => state.newOrders.nurse)
+  const patient = useSelector((state) => state.newOrders.patient)
+  const newOrder = useSelector((state) => state.newOrders.viewNewOrder)
 
-  const {addSnackbar} = useSnackbar();
+  const { addSnackbar } = useSnackbar();
 
-  const handleUpdate = (updatedOrder) => {
-    dispatch(setProducts(products.map((row) => (row.id === updatedOrder.id ? updatedOrder : row))
-    ));
+  const handleFieldChange = (event, newValue, setFormData) => {
+    const { name } = event.target;
+    console.log(newValue)
+    if (name)
+      setFormData((prevData) => ({ ...prevData, [name]: newValue.id }))
+  }
 
-    dispatch(setFilteredRows(Array.from(filteredRows).map((row)=> row.id === updatedOrder.id? updatedOrder: row)))
-    setSelectedProduct(null);
-    addSnackbar('Order updated successfully!', 'success');
-
-    navigate("/dashboard/recent-orders");
-  };
-
-  const handleCancelEdit = () => {
+  const handleCancel = () => {
     navigate(-1);
   };
 
-  if(!selectedProduct) {
-    return (
-      <div>
-        loading...
-      </div>
-    )
-  }
+  const handleSubmit = (data) => {
+    dispatch(createNewOrderRequest(data));
+    addSnackbar('New Order updated successfully!', 'success');
+    navigate('/dashboard/recent-orders');
+  };
+
+  useEffect(() => {
+    dispatch(viewNewOrderRequest({ id: params.id }))
+    dispatch(hospiceRequest())
+    dispatch(pharmacyRequest())
+    dispatch(nurseRequest())
+    dispatch(patientRequest())
+  }, []);
+
+
+  const formFields = [
+    {
+      name: 'hospice_id',
+      label: 'Hospice Id',
+      data: hospice,
+      fieldChange: handleFieldChange,
+      type: 'dropdown',
+      maxLength: 100,
+      enabled: true,
+      width: 2 / 3,
+    },
+    {
+      name: 'pharmacy_id',
+      label: 'Pharmacy Id',
+      data: pharmacy,
+      fieldChange: handleFieldChange,
+      type: 'dropdown',
+      maxLength: 500,
+      enabled: true,
+      width: 2 / 3,
+    },
+    {
+      name: 'nurse_id',
+      label: 'Nurse Id',
+      data: nurse,
+      fieldChange: handleFieldChange,
+      type: 'dropdown',
+      maxLength: 500,
+      enabled: true,
+      width: 2 / 3,
+    },
+    {
+      name: 'patient_id',
+      label: 'Patient Id',
+      data: patient,
+      fieldChange: handleFieldChange,
+      type: 'dropdown',
+      maxLength: 500,
+      enabled: true,
+      width: 2 / 3,
+    },
+    {
+      name: 'tax_price',
+      label: 'Tax Price',
+      type: 'number',
+      hidden: true,
+      enabled: true,
+      width: 2 / 3,
+    },
+    {
+      name: 'shipping_price',
+      label: 'Shipping Price',
+      type: 'number',
+      hidden: true,
+      enabled: true,
+      width: 2 / 3,
+    }
+  ];
+
   return (
     <div>
-      <Typography variant='h3' component='h2'margin='10px ' >Edit Order</Typography>
-      <EditForm row={selectedProduct} formFields={formFields} formName={formName} onCancel={handleCancelEdit} onUpdate={handleUpdate} />
+      {
+        newOrder &&
+
+        <SetForm
+          onCancel={handleCancel}
+          formName={formName}
+          formFields={formFields}
+          defaultData={newOrder}
+          handleSubmit={handleSubmit}
+        />
+      }
     </div>
   );
 }

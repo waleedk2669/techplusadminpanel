@@ -34,8 +34,10 @@ const MainRoutes = {
   children: [
     {
       index: true,
-      element: <DashboardDefault />
+      path: 'recent-orders',
+      element: <RecentOrders />
     },
+    
     {
       path: 'comfortKits',
       element: <ComfortKits />
@@ -45,11 +47,11 @@ const MainRoutes = {
       element: <CreateComfortKit />
     },
     {
-      path: 'comfortKits/edit',
+      path: 'comfortKits/edit/:id',
       element: <EditComfortKit />
     },
     {
-      path: 'comfortKits/view',
+      path: 'comfortKits/view/:id',
       element: <ViewComfortKit />
     },
     {
@@ -61,27 +63,23 @@ const MainRoutes = {
       element: <CreateMedicine />
     },
     {
-      path: 'medicines/edit',
+      path: 'medicines/edit/:id',
       element: <EditMedicine />
     },
     {
-      path: 'medicines/view',
+      path: 'medicines/view/:id',
       element: <ViewMedicine />
-    },
-    {
-      path: 'recent-orders',
-      element: <RecentOrders />
     },
     {
       path: 'recent-orders/create',
       element: <CreateOrder />
     },
     {
-      path: 'recent-orders/edit',
+      path: 'recent-orders/edit/:id',
       element: <EditOrder />
     },
     {
-      path: 'recent-orders/view',
+      path: 'recent-orders/view/:id',
       element: <ViewOrder />
     },
     {
@@ -93,7 +91,7 @@ const MainRoutes = {
       element: <CreateUser />
     },
     {
-      path: 'users/view',
+      path: 'users/view/:id',
       element: <ViewUser />
     },
     

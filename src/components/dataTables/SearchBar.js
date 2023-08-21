@@ -63,7 +63,7 @@
 
 import React from 'react';
 import RoundInputField from './RoundInputField';
-const SearchBar = ({ onSearch, placeholder }) => {
+const SearchBar = ({placeholder , onSearch}) => {
   const handleSearch = (event) => {
     const searchText = event.target.value;
     onSearch(searchText);

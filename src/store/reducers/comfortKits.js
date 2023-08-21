@@ -3,12 +3,11 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
   comfortKits: [],
-  selectedComfortKit: null,
-  isEditFormOpen: false,
   loading: false,
   error: null,
   viewComfortKit: null,
-  filteredRows: [], // New state property to manage the filtered rows
+  pageCount: null,
+  currentPage: null,
 };
 
 const comfortKitSlice = createSlice({
@@ -44,10 +43,13 @@ const comfortKitSlice = createSlice({
     },
     fetchComfortKitsRequest: (state, action) => {
       state.loading = true;
+      state.comfortKits = null
     },
     fetchComfortKitsSuccess: (state, action) => {
       state.loading = false;
       state.comfortKits = action.payload.data.data;
+      state.currentPage = action.payload.data.current_page;
+      state.pageCount = action.payload.data.last_page;
     },
     fetchComfortKitsFailure: (state, action) => {
       state.loading = false;
@@ -55,7 +57,7 @@ const comfortKitSlice = createSlice({
     },
     viewComfortKitRequest: (state, action) => {
       state.loading = true
-      console.log("entered")
+      state.viewComfortKit = null;
     },
     viewComfortKitSuccess: (state, action) => {
       state.loading = false;

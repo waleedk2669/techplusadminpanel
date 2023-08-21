@@ -1,49 +1,91 @@
 import React, { useEffect, useState } from 'react'; // Import useState
-import { Typography, Grid, IconButton } from '@mui/material';
+import { Typography, Grid, IconButton, Button } from '@mui/material';
 import { Visibility, Edit, Delete } from '@mui/icons-material'; // Import icons
 import DataTable from '../../components/DataTable';
 import { useDispatch, useSelector } from 'react-redux'; // Import useDispatch and useSelector
-import { fetchMedicinesRequest, searchMedicinesRequest, deleteMedicineRequest, newPageRequest } from '../../store/reducers/medicines'; // Import your action creators
+import { fetchNewOrdersRequest, searchNewOrdersRequest, deleteNewOrderRequest, newPageRequest } from '../../store/reducers/newOrders'; // Import your action creators
 import { useNavigate } from 'react-router'
 import { DeleteConfirmation } from '../../components/DeleteConfirmation';
 import { useSnackbar } from '../../components/Snackbar/SnackbarProvider';
 import Tag from '../../components/FormFields';
 
 
-const Medicines = () => {
+const DeliveredOrders = () => {
   
   const { addSnackbar } = useSnackbar();
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [deleteRowId, setDeleteRowId] = useState(null);
   const dispatch = useDispatch();
-  const medicines = useSelector(state => state.medicines.medicines);
-  const pageCount = useSelector(state => state.medicines.pageCount);
+  const newOrders = useSelector(state => state.newOrders.newOrders);
+  const pageCount = useSelector(state => state.newOrders.pageCount);
   const [loading, setLoading] = useState(false);
-  const currentPage = useSelector(state => state.medicines.currentPage);
+  const currentPage = useSelector(state => state.newOrders.currentPage);
   const navigate = useNavigate();
   const [rowsPerPage, setRowsPerPage] = useState(25);
+  const [disabled, setDisabled] = useState(true);
   
   const columns = [
-    {
-      field: 'name', headerName: 'Name', headerAlign: 'left', width: 200,
-    },
     // {
-    //   field: 'price', headerName: 'Price', headerAlign: 'left', width: 150,
+    //   field: 'sub_total', headerName: 'Sub Total', headerAlign: 'left', width: 150,
     //   renderCell: (params) => (
     //     <Typography>
-    //       ${params.row.price}
+    //       ${params.row.sub_total}
     //     </Typography>
     //   ),
     // },
+    // {
+    //   field: 'tax_price', headerName: 'Tax Price', headerAlign: 'left', width: 150,
+    //   renderCell: (params) => (
+    //     <Typography>
+    //       ${params.row.tax_price}
+    //     </Typography>
+    //   )
+    // },
+    // {
+    //   field: 'shipping_price', headerName: 'Shipping Price', headerAlign: 'left', width: 150,
+    //   renderCell: (params) => (
+    //     <Typography>
+    //       ${params.row.shipping_price}
+    //     </Typography>
+    //   )
+    // },
+    // {
+    //   field: 'grand_total', headerName: 'Grand Total', headerAlign: 'left', width: 150,
+    //   renderCell: (params) => (
+    //     <Typography>
+    //       ${params.row.grand_total}
+    //     </Typography>
+    //   )
+    // },
+    // {
+    //   field: 'status',
+    //   headerName: 'Status',
+    //   headerAlign: 'left',
+    //   width: 200,
+    //   renderCell: (params) => {
+    //     const active = params.row.status
+    //     return <Tag value={active} />
+    //   },
+    // },
+    
     {
-      field: 'is_enabled',
-      headerName: 'Active',
+      field: 'order_id',
+      headerName: 'Order Id',
       headerAlign: 'left',
       width: 200,
-      renderCell: (params) => {
-        const active = params.row.is_enabled
-        return <Tag value={active} />
-      },
+    },
+    
+    {
+      field: 'medicine_name',
+      headerName: 'Medicine name',
+      headerAlign: 'left',
+      width: 200,
+    },
+    {
+      field: 'quantity',
+      headerName: 'Quantity',
+      headerAlign: 'left',
+      width: 200,
     },
     {
       field: 'actions',
@@ -57,12 +99,6 @@ const Medicines = () => {
         <>
           <IconButton onClick={() => handleView(params.row.id)}>
             <Visibility />
-          </IconButton>
-          <IconButton onClick={() => handleEdit(params.row.id)}>
-            <Edit />
-          </IconButton>
-          <IconButton onClick={() => handleDeleteConfirmation(params.row.id)}>
-            <Delete />
           </IconButton>
         </>
       ),
@@ -79,7 +115,7 @@ const Medicines = () => {
 
   const handleSearch = (searchText) => {
     const searchPayload = { searchText: searchText, rowsPerPage: rowsPerPage };
-    dispatch(searchMedicinesRequest(searchPayload));
+    dispatch(searchNewOrdersRequest(searchPayload));
   };
 
   const handleDeleteConfirmation = (id) => {
@@ -87,8 +123,8 @@ const Medicines = () => {
     setShowDeleteConfirmation(true)
   };
   const handleDelete = () => {
-    dispatch(deleteMedicineRequest({id: deleteRowId}));
-    addSnackbar('Medicine Deleted Successfully', 'success');
+    dispatch(deleteNewOrderRequest({id: deleteRowId}));
+    addSnackbar('NewOrder Deleted Successfully', 'success');
     setShowDeleteConfirmation(false);
   };
   const handleCloseModal = () => {
@@ -102,41 +138,45 @@ const Medicines = () => {
   const handleRowsChange = (e)=> {
     setRowsPerPage(e.target.value)
   }
+  const onSelectionModelChange = (ids) => {
+    console.log(ids)
+    const selectedIDs = new Set(ids);
+    const selectedRowData = newOrders.filter((row) =>
+      selectedIDs.has(row.id)
+    );
+    console.log(selectedRowData);
+  }
 
   useEffect(() => {
-    dispatch(fetchMedicinesRequest({ rowsPerPage: rowsPerPage }));
+    dispatch(fetchNewOrdersRequest({ id: 5, rowsPerPage: rowsPerPage }));
     setLoading(true);
   }, [dispatch, rowsPerPage]);
 
   useEffect(() => {
     setLoading(false);
-    console.log(medicines)
+    console.log(newOrders)
 
-  }, [medicines]);
+  }, [newOrders]);
 
   return (
     <Grid container spacing={0}>
-      <Grid item xs={12}>
-        <Typography variant="h3" component="h2">
-          Medicines
-        </Typography>
-      </Grid>
       {
-        medicines &&
+        newOrders &&
         <>
           <Grid item xs={12}>
             <DataTable
               columns={columns}
               rowsPerPage={rowsPerPage}
-              data={medicines}
+              data={newOrders}
               loading={loading}
-              multiSelect={0}
-              resourceName={'medicine'}
+              multiSelect={1}
+              resourceName={'newOrder'}
               createRoute={'create'}
               handleSearch={handleSearch}
               handlePageChange={handlePageChange}
               pageCount={pageCount}
               currentPage={currentPage}
+              onSelectionModelChange={onSelectionModelChange}
               handleRowsChange={handleRowsChange}
             />
           </Grid>
@@ -151,4 +191,4 @@ const Medicines = () => {
   );
 };
 
-export default Medicines;
+export default DeliveredOrders;

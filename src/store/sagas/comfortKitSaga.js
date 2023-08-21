@@ -16,10 +16,8 @@ import {
 
 } from '../reducers/comfortKits';
 
-// API endpoint URLs (Replace with your actual API endpoints)
-const COMFORTKITS_API_URL = 'https://project.devxtop.com';
-const SEARCH_API_URL = 'https://fakestoreapi.com/products';
-const PAGE_API_URL = 'https://fakestoreapi.com/products';
+const baseUrl = 'https://project.devxtop.com';
+
 
 // Saga function to fetch comfortKits from the API
 function* fetchComfortKitsSaga(action) {
@@ -29,12 +27,11 @@ function* fetchComfortKitsSaga(action) {
   }
   const apiCall = () => {
     return axios.post(
-      COMFORTKITS_API_URL + '/api/comfort-kits/list',
-      '',
+      baseUrl + '/api/comfort-kits/list',
       {
-        params: {
-          'records': rowsPerPage
-        },
+        "records": rowsPerPage
+      },
+      {
         headers: {
           'accept': '*/*',
           'Authorization': authToken,
@@ -84,7 +81,7 @@ function* viewComfortKitSaga(action) {
       authToken = localStorage.getItem('authToken');
     }
     const apiCall = () => {
-      return axios.get(COMFORTKITS_API_URL + `/api/comfort-kits/view/${id}`, {
+      return axios.get(baseUrl + `/api/comfort-kits/view/${id}`, {
         headers: {
           'accept': '*/*',
           'Authorization': authToken,
@@ -105,41 +102,32 @@ function* createComfortKitSaga(action) {
   if (!authToken) {
     authToken = localStorage.getItem('authToken');
   }
-  const params = new URLSearchParams();
-  // params.append('hospice_id', '1');
-  // params.append('name', 'a');
-  // params.append('price', '10');
-  // params.append('is_enabled', '1');
-  // params.append('medicine_ids[]', '2');
-  // params.append('medicine_ids[]', '3');
-  // params.append('medicine_ids[]', '4');
+  let body;
   if (id) {
-    params.append('id', id);
-    params.append('hospice_id', '1');
-    params.append('name', name);
-    params.append('price', price);
-    params.append('is_enabled', is_enabled == 'on' ? 1 : 0);
-    medicines.map((medicine) => {
-      params.append('medicine_ids[]', medicine);
-    });
+    body = {
+      "id": id,
+      "hospice_id": "1",
+      "name": name,
+      "price": price?price:0,
+      "is_enabled": is_enabled,
+      "medicine_ids": medicines.length != 0 ? medicines : "",
+    }
   }
   else {
-    params.append('hospice_id', '1');
-    params.append('name', name);
-    params.append('price', price);
-    params.append('is_enabled', is_enabled == 'on' ? 1 : 0);
-    medicines.map((medicine) => {
-      params.append('medicine_ids[]', medicine);
-
-    });
-
+    body = {
+      "hospice_id": "1",
+      "name": name,
+      "price": price? price:0,
+      "is_enabled": is_enabled,
+      "medicine_ids": medicines.length != 0 ? medicines : [],
+    }
   }
+
   const apiCall = () => {
     return axios.post(
-      'https://project.devxtop.com/api/comfort-kits/set',
-      '',
+      baseUrl + '/api/comfort-kits/set',
+      body,
       {
-        params: params,
         headers: {
           'accept': '*/*',
           'Authorization': authToken,
@@ -165,14 +153,13 @@ function* searchComfortKitsSaga(action) {
     authToken = localStorage.getItem('authToken');
   }
   const apiCall = () => {
-    if(searchText.length == 0) {
+    if (searchText.length == 0) {
       return axios.post(
-        COMFORTKITS_API_URL + '/api/comfort-kits/list',
-        '',
+        baseUrl + '/api/comfort-kits/list',
         {
-          params: {
-            'records': rowsPerPage
-          },
+          'records': rowsPerPage
+        },
+        {
           headers: {
             'accept': '*/*',
             'Authorization': authToken,
@@ -182,13 +169,12 @@ function* searchComfortKitsSaga(action) {
       );
     }
     return axios.post(
-      'https://project.devxtop.com/api/comfort-kits/search',
-      '',
+      baseUrl + '/api/comfort-kits/search',
       {
-        params: {
-          'search': searchText,
-          'records': rowsPerPage
-        },
+        'search': searchText,
+        'records': rowsPerPage
+      },
+      {
         headers: {
           'accept': '*/*',
           'Authorization': authToken,
@@ -207,13 +193,27 @@ function* searchComfortKitsSaga(action) {
 }
 
 function* newPageSaga(action) {
-  const { newPage } = action.payload;
+  const { newPage, rowsPerPage } = action.payload;
+  const authToken = localStorage.getItem('authToken');
   try {
-    //const response = yield call(axios.get, `${SEARCH_API_URL}?search=${searchText}`);
-    const response = yield call(axios.get, PAGE_API_URL);
-    yield put(searchComfortKitsSuccess(response.data));
+    const apiCall = () => {
+      return axios.post(baseUrl + `/api/comfort-kits/list?page=${newPage}`,
+        {
+          records: rowsPerPage,
+        },
+        {
+          headers: {
+            'accept': '*/*',
+            'Authorization': authToken,
+            'Content-Type': 'application/x-www-form-urlencoded'
+          }
+        }
+      )
+    }
+    const response = yield call(apiCall);
+    yield put(fetchComfortKitsSuccess(response.data));
   } catch (error) {
-    yield put(searchComfortKitsFailure(error.message));
+    yield put(fetchComfortKitsFailure(error.message));
   }
 }
 

@@ -1,6 +1,5 @@
 // UserSaga.js
-// UserSaga.js
-import { put, takeLatest, all, call } from 'redux-saga/effects';
+import { put, takeLatest, all, select, call } from 'redux-saga/effects';
 import axios from 'axios';
 import {
   fetchUsersSuccess,
@@ -17,10 +16,8 @@ import {
   createUserFailure
 } from '../reducers/users';
 
-// API endpoint URLs (Replace with your actual API endpoints)
-const USERS_API_URL = 'https://project.devxtop.com';
-const SEARCH_API_URL = 'https://fakestoreapi.com/products';
-const PAGE_API_URL = 'https://fakestoreapi.com/products';
+const baseUrl = 'https://project.devxtop.com';
+
 
 // Saga function to fetch Users from the API
 function* fetchUsersSaga(action) {
@@ -28,15 +25,30 @@ function* fetchUsersSaga(action) {
   if (!authToken) {
     authToken = localStorage.getItem('authToken');
   }
+  const newPage = yield select((state) => state.medicines.currentPage)
   console.log(rowsPerPage)
   const apiCall = () => {
-    return axios.post(
-      'https://project.devxtop.com/api/auth/list',
-      '',
-      {
-        params: {
+    if (newPage) {
+      return axios.post(
+        baseUrl + `/api/auth/list?page=${newPage}`,
+        {
           'records': `${rowsPerPage}`,
         },
+        {
+          headers: {
+            'accept': '*/*',
+            'Authorization': authToken,
+            'Content-Type': 'application/x-www-form-urlencoded'
+          }
+        }
+      )
+    }
+    return axios.post(
+      baseUrl + '/api/auth/list',
+      {
+        'records': `${rowsPerPage}`,
+      },
+      {
         headers: {
           'accept': '*/*',
           'Authorization': authToken,
@@ -64,13 +76,12 @@ function* changeStatusSaga(action) {
   }
   const apiCall = () => {
     return axios.post(
-      'https://project.devxtop.com/api/auth/change-status',
-      '',
+      baseUrl + '/api/auth/change-status',
       {
-        params: {
-          'id': id,
-          'status': status,
-        },
+        'id': id,
+        'status': status,
+      },
+      {
         headers: {
           'accept': '*/*',
           'Authorization': authToken,
@@ -89,49 +100,28 @@ function* changeStatusSaga(action) {
 }
 
 function* createUserSaga(action) {
-  let { email, phone_number, first_name, last_name, dob, address, role_id, password } = action.payload.data;
-  console.log(email, phone_number, first_name, last_name, dob, address, role_id, password);
+  let { email, phone_number, first_name, last_name, dob, address, role_id, password } = action.payload;
+  console.log('role_id', role_id)
   const apiCall = () => {
     return axios.post(
-      'https://project.devxtop.com/api/auth/register',
-      '',
+      baseUrl + '/api/auth/register',
       {
-        params: {
-          'email': `${email}`,
-          'phone_number': `${phone_number}`,
-          'first_name': `${first_name}`,
-          'last_name': `${last_name}`,
-          'dob': `${dob}`,
-          'address': `${address}`,
-          'role_id': `${role_id}`,
-          'password': `${password}`
-        },
+        'email': `${email}`,
+        'phone_number': `${phone_number}`,
+        'first_name': `${first_name}`,
+        'last_name': `${last_name}`,
+        'dob': `${dob}`,
+        'address': `${address}`,
+        'role_id': `${role_id}`,
+        'password': `${password}`
+      },
+      {
         headers: {
           'accept': '*/*',
           'Content-Type': 'application/x-www-form-urlencoded'
         }
       }
     );
-    // return axios.post(
-    //   'https://project.devxtop.com/api/auth/register',
-    //   '',
-    //   {
-    //     params: {
-    //       'email': 'abcd@gmail.com',
-    //       'phone_number': '03071932669',
-    //       'first_name': 'Muhammad',
-    //       'last_name': 'Waleed',
-    //       'dob': '2002/06/30',
-    //       'address': 'H.No#73 Midland Aveneu Model town T-Chowk Multan',
-    //       'role_id': '1',
-    //       'password': 'admin'
-    //     },
-    //     headers: {
-    //       'accept': '*/*',
-    //       'Content-Type': 'application/x-www-form-urlencoded'
-    //     }
-    //   }
-    // );
   }
   try {
     const response = yield call(apiCall);
@@ -149,7 +139,7 @@ function* viewUsersSaga(action) {
     authToken = localStorage.getItem('authToken');
   }
   const apiCall = () => {
-    return axios.get(`https://project.devxtop.com/api/auth/view/${id}`, {
+    return axios.get(baseUrl + `/api/auth/view/${id}`, {
       headers: {
         'accept': '*/*',
         'Authorization': authToken
@@ -171,7 +161,7 @@ function* roleIdSaga(action) {
     authToken = localStorage.getItem('authToken');
   }
   const apiCall = () => {
-    return axios.get('https://project.devxtop.com/api/auth/roles', {
+    return axios.get(baseUrl + '/api/auth/roles', {
       headers: {
         'accept': '*/*'
       }
@@ -196,12 +186,11 @@ function* searchUsersSaga(action) {
   const apiCall = () => {
     if (searchText == '') {
       return axios.post(
-        'https://project.devxtop.com/api/auth/list',
-        '',
+        baseUrl + '/api/auth/list',
         {
-          params: {
-            'records': `${rowsPerPage}`,
-          },
+          'records': `${rowsPerPage}`,
+        },
+        {
           headers: {
             'accept': '*/*',
             'Authorization': authToken,
@@ -211,16 +200,15 @@ function* searchUsersSaga(action) {
       )
     }
     return axios.post(
-      'https://project.devxtop.com/api/auth/search',
-      '',
+      baseUrl + '/api/auth/search',
       {
-        params: {
-          'search': searchText,
-          'records': rowsPerPage
-        },
+        'search': searchText,
+        'records': rowsPerPage
+      },
+      {
         headers: {
           'accept': '*/*',
-          'Authorization': 'Bearer 4|LO7C4YdFSuLKrfleZe4IaNXlvqaGVeLuH0MSklQX',
+          'Authorization': authToken,
           'Content-Type': 'application/x-www-form-urlencoded'
         }
       }
@@ -237,13 +225,28 @@ function* searchUsersSaga(action) {
 }
 
 function* newPageSaga(action) {
-  const { newPage } = action.payload;
+  const { newPage, rowsPerPage } = action.payload;
+  const authToken = localStorage.getItem('authToken');
   try {
-    //const response = yield call(axios.get, `${SEARCH_API_URL}?search=${searchText}`);
-    const response = yield call(axios.get, PAGE_API_URL);
-    yield put(searchUsersSuccess(response.data));
+    const apiCall = () => {
+      return axios.post(baseUrl + `/api/auth/list?page=${newPage}`,
+        {
+          records: rowsPerPage,
+        },
+        {
+          headers: {
+            'accept': '*/*',
+            'Authorization': authToken,
+            'Content-Type': 'application/x-www-form-urlencoded'
+          }
+        }
+      )
+    }
+
+    const response = yield call(apiCall);
+    yield put(fetchUsersSuccess(response.data));
   } catch (error) {
-    yield put(searchUsersFailure(error.message));
+    yield put(fetchUsersFailure(error.message));
   }
 }
 

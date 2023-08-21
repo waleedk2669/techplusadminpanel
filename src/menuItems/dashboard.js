@@ -9,14 +9,6 @@ const dashboard = {
   type: 'group',
   children: [
     {
-      id: 'dashboard',
-      title: 'Dashboard',
-      type: 'item',
-      url: '/dashboard',
-      icon: 32, //ICON Name
-      breadcrumbs: false
-    },
-    {
       id: 'Recent Orders',
       title: 'Recent Orders',
       type: 'item',

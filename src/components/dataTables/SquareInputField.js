@@ -25,7 +25,7 @@ const SquareInput = styled(TextField)(({ theme, fullWidth }) => ({
   },
 }));
 
-const SquareInputField = ({ fullWidth, disabled, maxLength,onChange, type, ...restProps }) => {
+const SquareInputField = ({ fullWidth,value, disabled, maxLength,onChange, type, ...restProps }) => {
   return (
     <SquareInput
       variant="outlined"
@@ -33,6 +33,7 @@ const SquareInputField = ({ fullWidth, disabled, maxLength,onChange, type, ...re
       onChange={onChange}
       type={type}
       disabled={disabled}
+      value={value}
       {...restProps}
     />
   );

@@ -1,6 +1,5 @@
 // medicineSaga.js
-// medicineSaga.js
-import { put, takeLatest, all, call } from 'redux-saga/effects';
+import { put, takeLatest, all, call, select } from 'redux-saga/effects';
 import axios from 'axios';
 import {
   fetchMedicinesSuccess,
@@ -16,35 +15,43 @@ import {
 } from '../reducers/medicines';
 
 
-// API endpoint URLs (Replace with your actual API endpoints)
-const MEDICINES_API_URL = 'https://project.devxtop.com';
-const SEARCH_API_URL = 'https://project.devxtop.com';
-const PAGE_API_URL = 'https://fakestoreapi.com/products';
-// Saga function to fetch Medicines from the API
+const baseUrl = 'https://project.devxtop.com';
+
 
 function* fetchMedicinesSaga(action) {
-  let {rowsPerPage, authToken} = action.payload;
-  if(!authToken){
+  let { rowsPerPage, authToken } = action.payload;
+  if (!authToken) {
     authToken = localStorage.getItem('authToken');
   }
+  const newPage = yield select((state) => state.medicines.currentPage)
   console.log(rowsPerPage)
   const apiCall = () => {
+    if (newPage) {
+      return axios.post(baseUrl + `/api/medicines/list?page=${newPage}`,
+        {
+          records: rowsPerPage,
+        },
+        {
+          headers: {
+            'accept': '*/*',
+            'Authorization': authToken,
+            'Content-Type': 'application/x-www-form-urlencoded'
+          }
+        });
+    }
+
     return (
-      axios.post(MEDICINES_API_URL + `/api/medicines/list?records=${rowsPerPage}`,
-      '',
-      {
-        // params: {
-        //   'name': name,
-        //   'description': discription,
-        //   'price': price,
-        //   'is_enabled': enabled=='on'? 1 : 0,
-        // },
-        headers: {
-          'accept': '*/*',
-          'Authorization': authToken,
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      })
+      axios.post(baseUrl + `/api/medicines/list`,
+        {
+          records: rowsPerPage
+        },
+        {
+          headers: {
+            'accept': '*/*',
+            'Authorization': authToken,
+            'Content-Type': 'application/x-www-form-urlencoded'
+          }
+        })
     );
   }
   try {
@@ -56,34 +63,33 @@ function* fetchMedicinesSaga(action) {
   }
 }
 
-function* createMedicineSaga(action){
-  const {id, name, discription, mode, price, is_enabled} = action.payload.data;
-  let {authToken} = action.payload;
-  if(!authToken){
+function* createMedicineSaga(action) {
+  const { id, name, discription, mode, price, is_enabled } = action.payload;
+  let { authToken } = action.payload;
+  if (!authToken) {
     authToken = localStorage.getItem('authToken');
   }
   let params = {
     'name': name,
     'description': discription,
-    'price': price,
-    'is_enabled': is_enabled=='on'? 1 : 0,
+    'price': price? price: 0,
+    'is_enabled': is_enabled,
   };
-  if(id){
+  if (id) {
     params = {
       id: id,
       'name': name,
       'description': discription,
-      'price': price,
-      'is_enabled': is_enabled=='on'? 1 : 0,
+      'price': price? price: 0,
+      'is_enabled': is_enabled,
     }
   }
   console.log(authToken)
-  const apiCall = ()=>{
+  const apiCall = () => {
     return axios.post(
-      'https://project.devxtop.com/api/medicines/set',
-      '',
+      baseUrl + '/api/medicines/set',
+      params,
       {
-        params: params,
         headers: {
           'accept': '*/*',
           'Authorization': authToken,
@@ -102,62 +108,54 @@ function* createMedicineSaga(action){
   }
 }
 
-function* deleteMedicineSaga(action){
-  let {id, authToken} = action.payload;
-  if(!authToken){
+function* deleteMedicineSaga(action) {
+  let { id, authToken } = action.payload;
+  if (!authToken) {
     authToken = localStorage.getItem('authToken');
   }
   console.log(authToken);
   const apiCall = () => {
     return (
       axios.delete(MEDICINES_API_URL + `/api/medicines/delete/${id}`,
-      {
-        // params: {
-        //   'name': name,
-        //   'description': discription,
-        //   'price': price,
-        //   'is_enabled': enabled=='on'? 1 : 0,
-        // },
-        headers: {
-          'accept': '*/*',
-          'Authorization': authToken,
-        }
-      })
+        {
+          // params: {
+          //   'name': name,
+          //   'description': discription,
+          //   'price': price,
+          //   'is_enabled': enabled=='on'? 1 : 0,
+          // },
+          headers: {
+            'accept': '*/*',
+            'Authorization': authToken,
+          }
+        })
 
     );
   }
   try {
     const response = yield call(apiCall);
     console.log(response.data);
-      yield put(deleteMedicineSuccess(response.data));
+    yield put(deleteMedicineSuccess(response.data));
   } catch (error) {
     yield put(deleteMedicineFailure(error.message));
   }
 }
 
-function* viewMedicineSaga(action){
-  let {id, authToken} = action.payload;
-  if(!authToken){
+function* viewMedicineSaga(action) {
+  let { id, authToken } = action.payload;
+  if (!authToken) {
     authToken = localStorage.getItem('authToken');
   }
   console.log(authToken)
   const apiCall = () => {
     return (
-      axios.post(MEDICINES_API_URL + `/api/medicines/view/${id}`,
-      '',
-      {
-        // params: {
-        //   'name': name,
-        //   'description': discription,
-        //   'price': price,
-        //   'is_enabled': enabled=='on'? 1 : 0,
-        // },
-        headers: {
-          'accept': '*/*',
-          'Authorization': authToken,
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      })
+      axios.get(baseUrl + `/api/medicines/view/${id}`,
+        {
+          headers: {
+            'accept': '*/*',
+            'Authorization': authToken,
+          }
+        })
     );
   }
   try {
@@ -171,67 +169,75 @@ function* viewMedicineSaga(action){
 
 // Saga function to search Medicines from the API
 function* searchMedicinesSaga(action) {
-    let { searchText, rowsPerPage, authToken } = action.payload;
-    if(!authToken){
-      authToken = localStorage.getItem('authToken');
-    }
-    
-    const apiCall = () => {
-      if(searchText == ''){
-        return axios.post(MEDICINES_API_URL + `/api/medicines/list?records=${rowsPerPage}`,
-      '',
-      {
-        // params: {
-        //   'name': name,
-        //   'description': discription,
-        //   'price': price,
-        //   'is_enabled': enabled=='on'? 1 : 0,
-        // },
-        headers: {
-          'accept': '*/*',
-          'Authorization': authToken,
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      })}
-      return (
-        axios.post(MEDICINES_API_URL + `/api/medicines/search?search=${searchText}&records=${rowsPerPage}`,
-        '',
+  let { searchText, rowsPerPage, authToken } = action.payload;
+  if (!authToken) {
+    authToken = localStorage.getItem('authToken');
+  }
+  const newPage = yield select((state) => state.medicines.currentPage);
+  function apiCall() {
+    if (searchText == '') {
+      return axios.post(baseUrl + `/api/medicines/list?page=${newPage}`,
         {
-          // params: {
-          //   'name': name,
-          //   'description': discription,
-          //   'price': price,
-          //   'is_enabled': enabled=='on'? 1 : 0,
-          // },
+          records: rowsPerPage
+        },
+        {
           headers: {
             'accept': '*/*',
             'Authorization': authToken,
             'Content-Type': 'application/x-www-form-urlencoded'
           }
         })
-      );
     }
-    
-    try {
-      const response = yield call(apiCall);
-      console.log(response.data)
-      yield put(searchMedicinesSuccess(response.data));
-    } catch (error) {
-      yield put(searchMedicinesFailure(error.message));
-    }
+    return (
+      axios.post(baseUrl + `/api/medicines/search`,
+        {
+          search: searchText,
+          records: rowsPerPage,
+        },
+        {
+          headers: {
+            'accept': '*/*',
+            'Authorization': authToken,
+            'Content-Type': 'application/x-www-form-urlencoded'
+          }
+        })
+    );
   }
 
-  function* newPageSaga(action) {
-    const {newPage}= action.payload;
-    try {
-      //const response = yield call(axios.get, `${SEARCH_API_URL}?search=${searchText}`);
-      const response = yield call(axios.get, PAGE_API_URL);
-      yield put(searchMedicinesSuccess(response.data));
-    } catch (error) {
-      yield put(searchMedicinesFailure(error.message));
-    }
+  try {
+    const response = yield call(apiCall);
+    console.log(response.data)
+    yield put(searchMedicinesSuccess(response.data));
+  } catch (error) {
+    yield put(searchMedicinesFailure(error.message));
   }
-    
+}
+
+function* newPageSaga(action) {
+  const { newPage, rowsPerPage } = action.payload;
+  const authToken = localStorage.getItem('authToken');
+  try {
+    const apiCall = () => {
+      return axios.post(PAGE_API_URL + `/api/medicines/list?page=${newPage}`,
+        {
+          records: rowsPerPage,
+        },
+        {
+          headers: {
+            'accept': '*/*',
+            'Authorization': authToken,
+            'Content-Type': 'application/x-www-form-urlencoded'
+          }
+        }
+      );
+    }
+    const response = yield call(apiCall);
+    yield put(fetchMedicinesSuccess(response.data));
+  } catch (error) {
+    yield put(fetchMedicinesFailure(error.message));
+  }
+}
+
 // Saga watcher function to listen for fetch and search Medicine actions
 function* medicineSaga() {
   yield takeLatest('medicines/fetchMedicinesRequest', fetchMedicinesSaga);
@@ -239,7 +245,7 @@ function* medicineSaga() {
   yield takeLatest('medicines/deleteMedicineRequest', deleteMedicineSaga);
   yield takeLatest('medicines/viewMedicineRequest', viewMedicineSaga);
   yield takeLatest('medicines/newPageRequest', newPageSaga);
-    yield takeLatest('medicines/searchMedicinesRequest', searchMedicinesSaga);
+  yield takeLatest('medicines/searchMedicinesRequest', searchMedicinesSaga);
 }
 
 export default medicineSaga;

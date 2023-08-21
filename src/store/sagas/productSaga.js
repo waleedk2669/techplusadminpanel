@@ -9,15 +9,14 @@ import {
   searchProductsFailure,
 } from '../reducers/products';
 
-// API endpoint URLs (Replace with your actual API endpoints)
-const PRODUCTS_API_URL = 'https://jsonplaceholder.typicode.com/todos';
-const SEARCH_API_URL = 'https://jsonplaceholder.typicode.com/todos';
-const PAGE_API_URL = 'https://jsonplaceholder.typicode.com/todos';
 
+const baseUrl = 'https://project.devxtop.com';
+
+// API endpoint URLs (Replace with your actual API endpoints)
 // Saga function to fetch products from the API
 function* fetchProductsSaga() {
   try {
-    const response = yield call(axios.get, PRODUCTS_API_URL);
+    const response = yield call(axios.get, baseUrl);
     yield put(fetchProductsSuccess(response.data));
     console.log(response.data);
   } catch (error) {
@@ -30,7 +29,7 @@ function* searchProductsSaga(action) {
     const { searchText } = action.payload;
     try {
       //const response = yield call(axios.get, `${SEARCH_API_URL}?search=${searchText}`);
-      const response = yield call(axios.get, SEARCH_API_URL);
+      const response = yield call(axios.get, baseUrl);
       yield put(searchProductsSuccess(response.data));
     } catch (error) {
       yield put(searchProductsFailure(error.message));
@@ -40,8 +39,7 @@ function* searchProductsSaga(action) {
   function* newPageSaga(action) {
     const {newPage}= action.payload;
     try {
-      //const response = yield call(axios.get, `${SEARCH_API_URL}?search=${searchText}`);
-      const response = yield call(axios.get, PAGE_API_URL);
+      const response = yield call(axios.get, baseUrl);
       yield put(searchProductsSuccess(response.data));
     } catch (error) {
       yield put(searchProductsFailure(error.message));

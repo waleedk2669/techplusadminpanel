@@ -5,7 +5,6 @@ import { Stack, Typography } from '@mui/material';
 
 // project import
 import DrawerHeaderStyled from './DrawerHeaderStyled';
-import Logo from 'components/Logo';
 
 // ==============================|| DRAWER HEADER ||============================== //
 

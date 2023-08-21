@@ -1,77 +1,76 @@
-import React from 'react'
-import { Typography } from '@mui/material';
-import CreateForm from '../../components/dataTables/CreateForm';
+import React, { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router';
 import { useSnackbar } from '../../components/Snackbar/SnackbarProvider';
-import { createMedicineRequest } from '../../store/reducers/medicines';
+import { createMedicineRequest, viewMedicineRequest } from '../../store/reducers/medicines';
+import { SetForm } from '../../components/SetForm';
+import { useParams } from 'react-router';
 
 const EditMedicine = () => {
   const formFields = [
     {
-      name:'id',
-      label: 'id',
-      type: 'string',
-      enabled: false,
+      name: 'name',
+      label: 'Name',
+      type: 'text',
+      maxLength: 100,
+      enabled: true,
+      width: 2 / 3,
     },
     {
-    name: 'name',
-    label: 'name',
-    type: 'string',
-    enabled: true,
-  }, 
-  {
-    name: 'description',
-    label: 'description',
-    type: 'string',
-    maxLength: 255,
-    enabled: true,
-  },
-  {
-    name: 'price',
-    label: 'price',
-    type: 'number',
-    enabled: true,
-  },
-  {
-    name: 'is_enabled',
-    label: 'enabled',
-    type: 'switch',
-    enabled: true
-  }
-];
+      name: 'description',
+      label: 'Description',
+      type: 'textarea',
+      maxLength: 500,
+      enabled: true,
+      width: 2 / 3,
+    },
+    {
+      name: 'price',
+      label: 'Price',
+      type: 'number',
+      enabled: true,
+      hidden: true,
+      width: 2 / 3,
+    },
+    {
+      name: 'is_enabled',
+      label: 'Active',
+      type: 'switch',
+      enabled: true,
+      width: 2 / 3,
+    }
+  ];
+
   const formName = 'Update Medicine';
-  const selectedMedicine = useSelector((state)=> state.medicines.selectedMedicine)
-  console.log(selectedMedicine)
-  const medicines = useSelector((state)=> state.medicines.medicines);
-  const filteredRows = useSelector((state)=> state.medicines.filteredRows);
+  const medicine = useSelector((state) => state.medicines.viewMedicine);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const params = useParams();
+  const { addSnackbar } = useSnackbar();
 
-  const {addSnackbar} = useSnackbar();
-
-  const handleCreate = (newOrder) => {
-    dispatch(createMedicineRequest(newOrder));
-    console.log(newOrder);
-    addSnackbar('Medicine created successfully!', 'success');
+  const handleEdit = (data) => {
+    dispatch(createMedicineRequest(data));
+    console.log(data);
+    addSnackbar('Medicine updated successfully!', 'success');
     navigate('/dashboard/medicines');
   };
-  
+
   const handleCancelEdit = () => {
     navigate(-1);
   };
 
-  if(!selectedMedicine) {
-    return (
-      <div>
-        loading...
-      </div>
-    )
-  }
+  useEffect(() => {
+    dispatch(viewMedicineRequest({ id: params.id }))
+  }, [])
+
   return (
     <div>
-      <Typography variant='h3' component='h2'margin='10px ' >Edit Medicine</Typography>
-      <CreateForm defaultData={selectedMedicine} formFields={formFields} formName={formName} onCancel={handleCancelEdit} onCreate={handleCreate} />
+      {
+        medicine &&
+        <>
+          <SetForm defaultData={medicine} formFields={formFields} formName={formName} onCancel={handleCancelEdit} handleSubmit={handleEdit} />
+        </>
+      }
     </div>
   );
 }

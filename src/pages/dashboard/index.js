@@ -28,7 +28,6 @@ import avatar1 from '../../assets/images/users/avatar-1.png';
 import avatar2 from '../../assets/images/users/avatar-2.png';
 import avatar3 from '../../assets/images/users/avatar-3.png';
 import avatar4 from '../../assets/images/users/avatar-4.png';
-import ExportDefaultToolbar from '../../components/dataTables/CustomDataGrid';
 
 // avatar style
 const avatarSX = {
@@ -150,8 +149,6 @@ const DashboardDefault = () => {
           <Grid item />
         </Grid>
         <MainCard sx={{ mt: 2 }} content={false}>
-          {/* <OrdersTable /> */}
-          <ExportDefaultToolbar />
         </MainCard>
       </Grid>
       <Grid item xs={12} md={5} lg={4}>

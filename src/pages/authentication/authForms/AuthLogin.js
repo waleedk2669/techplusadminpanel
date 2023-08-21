@@ -51,7 +51,7 @@ const AuthLogin = () => {
 
   useEffect(() => {
     if (login) {
-      navigate('/dashboard'); // Make sure to fix the typo ('nevigate' to 'navigate')
+      navigate('/dashboard/recent-orders'); // Make sure to fix the typo ('nevigate' to 'navigate')
     }
   },[login]);
 

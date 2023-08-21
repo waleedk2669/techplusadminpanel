@@ -1,6 +1,5 @@
 import React from 'react'
-import { Typography } from '@mui/material';
-import CreateForm from '../../components/dataTables/CreateForm'
+import { SetForm } from '../../components/SetForm';
 import { useSelector, useDispatch } from 'react-redux';
 import { createMedicineRequest } from '../../store/reducers/medicines';
 import { useNavigate } from 'react-router';
@@ -9,67 +8,70 @@ import { useSnackbar } from '../../components/Snackbar/SnackbarProvider';
 const CreateMedicine = () => {
   const formFields = [
     {
-      name:'id',
-      label: 'id',
-      type: 'string',
-      enabled: false,
+      name: 'name',
+      label: 'Name',
+      type: 'text',
+      maxLength: 100,
+      enabled: true,
+      width: 2 / 3,
     },
     {
-    name: 'name',
-    label: 'name',
-    type: 'string',
-    enabled: true,
-  }, 
-  {
-    name: 'description',
-    label: 'description',
-    type: 'string',
-    maxLength: 255,
-    enabled: true,
-  },
-  {
-    name: 'price',
-    label: 'price',
-    type: 'number',
-    enabled: true,
-  },
-  {
-    name: 'is_enabled',
-    label: 'enabled',
-    type: 'switch',
-    enabled: true
-  }
-];
+      name: 'description',
+      label: 'Description',
+      type: 'textarea',
+      maxLength: 500,
+      enabled: true,
+      width: 2 / 3,
+    },
+    {
+      name: 'price',
+      label: 'Price',
+      type: 'number',
+      hidden: true,
+      enabled: true,
+      width: 2 / 3,
+    },
+    {
+      name: 'is_enabled',
+      label: 'Active',
+      type: 'switch',
+      enabled: true,
+      width: 2 / 3,
+    }
+  ];
+
   const defaultData = {
     id: '',
     name: '',
     price: '',
   };
+
   const formName = 'Create Medicine';
-  const loading = useSelector((state)=> state.medicines.loading)
-  const medicines = useSelector((state)=> state.medicines.medicines);
-  const filteredRows = useSelector((state)=> state.medicines.filteredRows);
+  const loading = useSelector((state) => state.medicines.loading)
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const {addSnackbar} = useSnackbar();
+  const { addSnackbar } = useSnackbar();
 
-  const handleCancelCreate = () => {
+  const handleCancel = () => {
     navigate(-1);
   };
 
-  const handleCreate = (newOrder) => {
-    dispatch(createMedicineRequest(newOrder));
-    console.log(newOrder);
+  const handleSubmit = (data) => {
+    dispatch(createMedicineRequest(data));
     addSnackbar('Medicine created successfully!', 'success');
     navigate('/dashboard/medicines');
   };
-  
-  
+
   return (
     <div>
-      <Typography variant='h3' component='h2'margin='10px ' >Create Medicine</Typography>
-      <CreateForm onCancel={handleCancelCreate} onCreate={handleCreate} formName={formName} formFields={formFields} defaultData={defaultData} />
+      <SetForm
+        onCancel={handleCancel}
+        formName={formName}
+        formFields={formFields}
+        defaultData={defaultData}
+        handleSubmit={handleSubmit}
+      />
     </div>
   );
 }

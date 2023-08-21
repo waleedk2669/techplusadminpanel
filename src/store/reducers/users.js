@@ -3,13 +3,12 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
   users: [],
-  selectedUser: null,
-  isEditFormOpen: false,
   loading: false,
   error: null,
   viewUser: null,
   roles: null,
-  filteredRows: [], // New state property to manage the filtered rows
+  pageCount: null,
+  currentPage: null,
 };
 
 const userSlice = createSlice({
@@ -37,17 +36,16 @@ const userSlice = createSlice({
     toggleEditForm: (state) => {
       state.isEditFormOpen = !state.isEditFormOpen;
     },
-    setFilteredRows: (state, action) => {
-      state.filteredRows = action.payload;
-    },
     fetchUsersRequest: (state,action) => {
       state.loading = true;
+      state.users = null;
     },
     fetchUsersSuccess: (state, action) => {
       state.loading = false;
       state.users = action.payload.data.data;
       console.log(action.payload.data.data);
-      state.filteredRows = action.payload.data.data; // Initialize filteredUsers with all Users
+      state.currentPage = action.payload.data.current_page;
+      state.pageCount = action.payload.data.last_page;
     },
     fetchUsersFailure: (state, action) => {
       state.loading = false;
@@ -55,6 +53,7 @@ const userSlice = createSlice({
     },
     viewUsersRequest: (state,action) => {
       state.loading = true;
+      state.viewUser = null;
     },
     viewUsersSuccess: (state, action) => {
       state.loading = false;
@@ -77,6 +76,7 @@ const userSlice = createSlice({
     },
     roleIdRequest: (state,action) => {
       state.loading = true;
+      state.roles = null;
     },
     roleIdSuccess: (state, action) => {
       state.loading = false;
@@ -95,6 +95,7 @@ const userSlice = createSlice({
     },
     createUserFailure: (state, action) => {
       state.loading = false;
+      state.error = action.payload;
     },
     searchUsersRequest: (state) => {
       state.loading = true;
@@ -102,7 +103,6 @@ const userSlice = createSlice({
     searchUsersSuccess: (state, action) => {
       state.loading = false;
       state.users = action.payload.data.data;
-      state.filteredRows = action.payload.data.data; // Update filteredUsers with search results
     },
     searchUsersFailure: (state, action) => {
       state.loading = false;
@@ -114,7 +114,6 @@ const userSlice = createSlice({
     newPageSuccess: (state, action) => {
       state.loading = false;
       state.users = action.payload;
-      state.filteredRows = action.payload; // Update filteredUsers with search results
     },
     newPageFailure: (state, action) => {
       state.loading = false;
